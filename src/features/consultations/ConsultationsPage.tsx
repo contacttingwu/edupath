@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { MessageSquare, Plus, Search } from 'lucide-react'
+import { MessageSquare, Search } from 'lucide-react'
 import { getAllConsultations } from '@/lib/api/consultations'
 import { getAllStudents } from '@/lib/api/students'
 import { AddConsultationModal } from '@/features/students/AddConsultationModal'
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatDate } from '@/lib/utils'
+import { useUIStore } from '@/store/ui'
 import type { Consultation, Student } from '@/types'
 
 // ─── Enriched row type ───────────────────────────────────────────────────────
@@ -75,7 +76,8 @@ function ConsultationRow({ row }: { row: ConsultRow }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export function ConsultationsPage() {
-  const [modalOpen, setModalOpen] = useState(false)
+  const addConsultationOpen = useUIStore((s) => s.addConsultationOpen)
+  const closeAddConsultation = useUIStore((s) => s.closeAddConsultation)
   const [search, setSearch] = useState('')
   const [tagFilter, setTagFilter] = useState<string | null>(null)
 
@@ -130,7 +132,7 @@ export function ConsultationsPage() {
       <div className="space-y-5">
         {/* Header row */}
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 flex-1">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className="relative flex-1 max-w-xs">
               <Search
                 size={14}
@@ -165,14 +167,6 @@ export function ConsultationsPage() {
               </div>
             )}
           </div>
-
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors shrink-0"
-          >
-            <Plus size={15} />
-            Log Consultation
-          </button>
         </div>
 
         {/* Summary */}
@@ -243,10 +237,9 @@ export function ConsultationsPage() {
         </Card>
       </div>
 
-      {modalOpen && (
+      {addConsultationOpen && (
         <AddConsultationModal
-          onClose={() => setModalOpen(false)}
-          onSuccess={() => void 0}
+          onClose={closeAddConsultation}
         />
       )}
     </>
