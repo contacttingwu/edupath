@@ -1,11 +1,4 @@
-// snake_case DB rows → camelCase domain types
-
-import type {
-  StudentRow,
-  VisaRow,
-  ApplicationRow,
-  ConsultationRow,
-} from '@/types/database'
+import type { StudentRow, VisaRow, ApplicationRow, ConsultationRow } from '@/types/database'
 import type { Student, Visa, Application, Consultation } from '@/types'
 
 export function mapStudent(row: StudentRow): Student {
@@ -19,12 +12,20 @@ export function mapStudent(row: StudentRow): Student {
     phone: row.phone,
     addrOverseas: row.addr_overseas,
     addrHome: row.addr_home,
+    googleDriveLink: row.google_drive_link,
     emergencyContact: {
       name: row.ec_name,
       relationship: row.ec_relationship,
       phone: row.ec_phone,
       email: row.ec_email,
       address: row.ec_addr,
+    },
+    emergencyContact2: {
+      name: row.ec2_name,
+      relationship: row.ec2_relationship,
+      phone: row.ec2_phone,
+      email: row.ec2_email,
+      address: row.ec2_addr,
     },
     educationHistory: row.education_history,
     workExperience: row.work_experience,
@@ -44,6 +45,9 @@ export function mapVisa(row: VisaRow): Visa {
     issueDate: row.issue_date,
     expiryDate: row.expiry_date,
     isCurrent: row.is_current,
+    outcome: row.outcome,
+    appealDecision: row.appeal_decision,
+    appealStatus: row.appeal_status,
     createdAt: row.created_at,
   }
 }

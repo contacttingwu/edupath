@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { mapVisa } from './mappers'
 import type { Visa } from '@/types'
-import type { VisaInsert } from '@/types/database'
+import type { VisaInsert, VisaUpdate } from '@/types/database'
 
 export async function getVisasByStudentId(studentId: string): Promise<Visa[]> {
   const { data, error } = await supabase
@@ -37,25 +37,39 @@ export async function createVisa(input: VisaInsert): Promise<Visa> {
   return mapVisa(data)
 }
 
+export async function updateVisa(id: string, input: VisaUpdate): Promise<Visa> {
+  const { data, error } = await supabase
+    .from('visas')
+    .update(input)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return mapVisa(data)
+}
+
+export async function deleteVisa(id: string): Promise<void> {
+  const { error } = await supabase.from('visas').delete().eq('id', id)
+  if (error) throw error
+}
+
 /** Sets the given visa as current; clears is_current on all others for the student */
 export async function setCurrentVisa(visaId: string, studentId: string): Promise<void> {
-  // Clear all current visas for this student first
   const { error: clearError } = await supabase
     .from('visas')
     .update({ is_current: false })
     .eq('student_id', studentId)
-
   if (clearError) throw clearError
 
   const { error } = await supabase
     .from('visas')
     .update({ is_current: true })
     .eq('id', visaId)
-
   if (error) throw error
 }
 
-/** All current visas with days until expiry — used by visa tracker and sidebar badge */
+/** All current visas — used by visa tracker and sidebar badge */
 export async function getAllCurrentVisas(): Promise<Visa[]> {
   const { data, error } = await supabase
     .from('visas')
@@ -72,7 +86,6 @@ export async function getAllCurrentVisas(): Promise<Visa[]> {
 export async function getExpiringVisas(withinDays: number): Promise<Visa[]> {
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
-
   const cutoff = new Date(today)
   cutoff.setDate(cutoff.getDate() + withinDays)
 

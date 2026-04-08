@@ -1,4 +1,4 @@
-// Auto-generated from supabase/migrations/001_initial_schema.sql
+// Auto-generated from supabase/migrations/001_initial_schema.sql + 003_form_enhancements.sql
 // Regenerate with: npx supabase gen types typescript --project-id <your-project-id>
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
@@ -17,11 +17,19 @@ export type Database = {
           phone: string | null
           addr_overseas: string | null
           addr_home: string | null
+          google_drive_link: string | null
+          // Emergency contact 1
           ec_name: string | null
           ec_relationship: string | null
           ec_phone: string | null
           ec_email: string | null
           ec_addr: string | null
+          // Emergency contact 2
+          ec2_name: string | null
+          ec2_relationship: string | null
+          ec2_phone: string | null
+          ec2_email: string | null
+          ec2_addr: string | null
           education_history: string | null
           work_experience: string | null
           status: StudentStatus
@@ -39,11 +47,17 @@ export type Database = {
           phone?: string | null
           addr_overseas?: string | null
           addr_home?: string | null
+          google_drive_link?: string | null
           ec_name?: string | null
           ec_relationship?: string | null
           ec_phone?: string | null
           ec_email?: string | null
           ec_addr?: string | null
+          ec2_name?: string | null
+          ec2_relationship?: string | null
+          ec2_phone?: string | null
+          ec2_email?: string | null
+          ec2_addr?: string | null
           education_history?: string | null
           work_experience?: string | null
           status?: StudentStatus
@@ -61,11 +75,17 @@ export type Database = {
           phone?: string | null
           addr_overseas?: string | null
           addr_home?: string | null
+          google_drive_link?: string | null
           ec_name?: string | null
           ec_relationship?: string | null
           ec_phone?: string | null
           ec_email?: string | null
           ec_addr?: string | null
+          ec2_name?: string | null
+          ec2_relationship?: string | null
+          ec2_phone?: string | null
+          ec2_email?: string | null
+          ec2_addr?: string | null
           education_history?: string | null
           work_experience?: string | null
           status?: StudentStatus
@@ -84,6 +104,9 @@ export type Database = {
           issue_date: string | null
           expiry_date: string | null
           is_current: boolean
+          outcome: VisaOutcome
+          appeal_decision: VisaAppealDecision | null
+          appeal_status: string | null
           created_at: string
         }
         Insert: {
@@ -94,6 +117,9 @@ export type Database = {
           issue_date?: string | null
           expiry_date?: string | null
           is_current?: boolean
+          outcome?: VisaOutcome
+          appeal_decision?: VisaAppealDecision | null
+          appeal_status?: string | null
           created_at?: string
         }
         Update: {
@@ -104,6 +130,9 @@ export type Database = {
           issue_date?: string | null
           expiry_date?: string | null
           is_current?: boolean
+          outcome?: VisaOutcome
+          appeal_decision?: VisaAppealDecision | null
+          appeal_status?: string | null
           created_at?: string
         }
         Relationships: [
@@ -214,7 +243,20 @@ export type StudentStatus =
   | 'Enrolled'
   | 'Visa Lodged'
   | 'Visa Approved'
+  | 'Visa Refused'
   | 'Departed'
+
+export type VisaOutcome = 'pending' | 'granted' | 'refused'
+export type VisaAppealDecision = 'appeal' | 'left'
+
+export const APPEAL_STATUSES = [
+  'Preparing',
+  'Submitted',
+  'Under Review',
+  'Outcome Received',
+  'Withdrawn',
+] as const
+export type AppealStatus = (typeof APPEAL_STATUSES)[number]
 
 export const STUDENT_STATUSES: StudentStatus[] = [
   'Consulting',
@@ -225,6 +267,7 @@ export const STUDENT_STATUSES: StudentStatus[] = [
   'Enrolled',
   'Visa Lodged',
   'Visa Approved',
+  'Visa Refused',
   'Departed',
 ]
 

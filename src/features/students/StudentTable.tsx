@@ -11,7 +11,7 @@ import { deleteStudent } from '@/lib/api/students'
 import type { StudentRow } from '@/hooks/useStudents'
 import type { StudentStatus } from '@/types/database'
 
-const STATUS_VARIANT: Record<StudentStatus, 'purple' | 'neutral' | 'safe' | 'warning'> = {
+const STATUS_VARIANT: Record<StudentStatus, 'purple' | 'neutral' | 'safe' | 'warning' | 'urgent'> = {
   'Consulting':          'neutral',
   'Documents Preparing': 'warning',
   'Applied':             'neutral',
@@ -20,6 +20,7 @@ const STATUS_VARIANT: Record<StudentStatus, 'purple' | 'neutral' | 'safe' | 'war
   'Enrolled':            'safe',
   'Visa Lodged':         'neutral',
   'Visa Approved':       'safe',
+  'Visa Refused':        'urgent',
   'Departed':            'neutral',
 }
 

@@ -1,4 +1,4 @@
-export type { StudentStatus, STUDENT_STATUSES } from './database'
+export type { StudentStatus, VisaOutcome, VisaAppealDecision, AppealStatus, STUDENT_STATUSES } from './database'
 export type { Database } from './database'
 
 // ─── STUDENT ─────────────────────────────────────────────────────────────────
@@ -7,13 +7,15 @@ export interface Student {
   id: string
   name: string
   preferredName: string | null
-  dob: string | null           // ISO date YYYY-MM-DD
+  dob: string | null
   nationality: string | null
   email: string | null
   phone: string | null
   addrOverseas: string | null
   addrHome: string | null
+  googleDriveLink: string | null
   emergencyContact: EmergencyContact
+  emergencyContact2: EmergencyContact
   educationHistory: string | null
   workExperience: string | null
   status: import('./database').StudentStatus
@@ -37,9 +39,12 @@ export interface Visa {
   studentId: string
   visaType: string | null
   visaNumber: string | null
-  issueDate: string | null     // ISO date YYYY-MM-DD
-  expiryDate: string | null    // ISO date YYYY-MM-DD
+  issueDate: string | null
+  expiryDate: string | null
   isCurrent: boolean
+  outcome: import('./database').VisaOutcome
+  appealDecision: import('./database').VisaAppealDecision | null
+  appealStatus: string | null
   createdAt: string
 }
 
@@ -50,7 +55,7 @@ export interface Application {
   studentId: string
   school: string | null
   program: string | null
-  intakeDate: string | null    // ISO date YYYY-MM-DD
+  intakeDate: string | null
   status: string | null
   createdAt: string
 }
@@ -60,20 +65,18 @@ export interface Application {
 export interface Consultation {
   id: string
   studentId: string
-  consultDate: string          // ISO date YYYY-MM-DD
+  consultDate: string
   notes: string
   tags: string[]
   createdAt: string
 }
 
-// ─── ENRICHED TYPES (joined queries) ─────────────────────────────────────────
+// ─── ENRICHED TYPES ───────────────────────────────────────────────────────────
 
-/** Student with their current visa attached */
 export interface StudentWithVisa extends Student {
   currentVisa: Visa | null
 }
 
-/** Student with latest consultation date */
 export interface StudentWithLastConsult extends Student {
   lastConsultDate: string | null
 }

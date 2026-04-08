@@ -18,6 +18,7 @@ const STATUS_COLORS: Record<StudentStatus, string> = {
   'Enrolled':            'border-t-emerald-400',
   'Visa Lodged':         'border-t-cyan-400',
   'Visa Approved':       'border-t-green-500',
+  'Visa Refused':        'border-t-rose-500',
   'Departed':            'border-t-slate-300',
 }
 
