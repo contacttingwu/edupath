@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import {
   Pencil, ExternalLink, Phone, Mail, MapPin,
   GraduationCap, Briefcase, BookOpen, User,
@@ -155,6 +156,11 @@ export function StudentDetailPage() {
     queryKey: ['students', id],
     queryFn: () => getStudentById(id!),
   })
+
+  const pageTitle = studentQuery.data
+    ? (studentQuery.data.preferredName ?? studentQuery.data.name)
+    : 'Student'
+  usePageTitle(pageTitle)
 
   const visasQuery = useQuery({
     queryKey: ['visas', 'all', id],

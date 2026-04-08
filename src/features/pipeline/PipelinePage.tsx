@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import { getAllStudents, updateStudent } from '@/lib/api/students'
 import { getAllCurrentVisas } from '@/lib/api/visas'
 import { getRecentConsultations } from '@/lib/api/consultations'
@@ -152,6 +153,7 @@ function PipelineColumn({ status, students, visaMap, lastConsultMap, onMove }: P
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export function PipelinePage() {
+  usePageTitle('Pipeline')
   const queryClient = useQueryClient()
 
   const studentsQuery = useQuery({

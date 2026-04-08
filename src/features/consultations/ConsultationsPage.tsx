@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { MessageSquare, Search } from 'lucide-react'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import { getAllConsultations } from '@/lib/api/consultations'
 import { getAllStudents } from '@/lib/api/students'
 import { AddConsultationModal } from '@/features/students/AddConsultationModal'
@@ -76,6 +77,7 @@ function ConsultationRow({ row }: { row: ConsultRow }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export function ConsultationsPage() {
+  usePageTitle('Consultations')
   const addConsultationOpen = useUIStore((s) => s.addConsultationOpen)
   const closeAddConsultation = useUIStore((s) => s.closeAddConsultation)
   const [search, setSearch] = useState('')

@@ -16,9 +16,6 @@ function useTopbarConfig(): TopbarConfig {
 
   const path = location.pathname
 
-  if (path === '/dashboard') {
-    return { title: 'Dashboard', breadcrumbs: [{ label: 'Dashboard' }] }
-  }
   if (path === '/students/new') {
     return {
       title: 'Add Student',
@@ -46,15 +43,33 @@ function useTopbarConfig(): TopbarConfig {
     }
   }
   if (path === '/pipeline') {
-    return { title: 'Pipeline', breadcrumbs: [{ label: 'Pipeline' }] }
+    return {
+      title: 'Pipeline',
+      breadcrumbs: [{ label: 'Pipeline' }],
+      ctaLabel: 'Log Consultation',
+      ctaAction: () => openAddConsultation(),
+    }
   }
   if (path === '/visas') {
-    return { title: 'Visa Tracker', breadcrumbs: [{ label: 'Visa Tracker' }] }
+    return {
+      title: 'Visa Tracker',
+      breadcrumbs: [{ label: 'Visa Tracker' }],
+      ctaLabel: 'Log Consultation',
+      ctaAction: () => openAddConsultation(),
+    }
   }
   if (path === '/consultations') {
     return {
       title: 'Consultations',
       breadcrumbs: [{ label: 'Consultations' }],
+      ctaLabel: 'Log Consultation',
+      ctaAction: () => openAddConsultation(),
+    }
+  }
+  if (path === '/dashboard') {
+    return {
+      title: 'Dashboard',
+      breadcrumbs: [{ label: 'Dashboard' }],
       ctaLabel: 'Log Consultation',
       ctaAction: () => openAddConsultation(),
     }

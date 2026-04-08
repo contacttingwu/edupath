@@ -2,8 +2,10 @@ import { StatsGrid } from './StatsGrid'
 import { VisaAlertList } from './VisaAlertList'
 import { RecentConsultations } from './RecentConsultations'
 import { PipelineMini } from './PipelineMini'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 export function DashboardPage() {
+  usePageTitle('Dashboard')
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <StatsGrid />

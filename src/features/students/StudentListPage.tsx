@@ -6,8 +6,10 @@ import { StatusFilterBar } from './StatusFilterBar'
 import { StudentTable } from './StudentTable'
 import { STUDENT_STATUSES } from '@/types/database'
 import type { StudentStatus } from '@/types/database'
+import { usePageTitle } from '@/hooks/usePageTitle'
 
 export function StudentListPage() {
+  usePageTitle('Students')
   const searchQuery = useUIStore((s) => s.searchQuery)
   const statusFilter = useUIStore((s) => s.statusFilter)
   const setStatusFilter = useUIStore((s) => s.setStatusFilter)

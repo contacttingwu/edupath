@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AlertTriangle, Clock, CheckCircle, ShieldOff } from 'lucide-react'
 import { useVisaAlerts } from '@/hooks/useVisaAlerts'
+import { usePageTitle } from '@/hooks/usePageTitle'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -153,6 +154,7 @@ function VisaRow({ entry }: { entry: VisaAlertEntry }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export function VisaTrackerPage() {
+  usePageTitle('Visa Tracker')
   const [activeTab, setActiveTab] = useState<FilterTab>('all')
   const { summary, isLoading } = useVisaAlerts()
 
