@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { mapStudent, mapVisa } from './mappers'
 import type { Student, StudentWithVisa } from '@/types'
-import type { StudentInsert, StudentUpdate } from '@/types/database'
+import type { StudentInsert, StudentStatus, StudentUpdate } from '@/types/database'
 
 export async function getAllStudents(): Promise<Student[]> {
   const { data, error } = await supabase
@@ -31,8 +31,10 @@ export async function getStudentsWithCurrentVisa(): Promise<StudentWithVisa[]> {
   }
 
   return data.map((row) => {
-    const { visas, ...studentRow } = row as typeof row & { visas: unknown[] }
-    const visaRows = Array.isArray(visas) ? visas : []
+    const rowAny = row as Record<string, unknown>
+    const visaRows = Array.isArray(rowAny['visas']) ? (rowAny['visas'] as unknown[]) : []
+    const { visas: _visas, ...studentRow } = rowAny
+    void _visas
     return {
       ...mapStudent(studentRow as Parameters<typeof mapStudent>[0]),
       currentVisa: visaRows.length > 0 ? mapVisa(visaRows[0] as Parameters<typeof mapVisa>[0]) : null,
@@ -97,7 +99,7 @@ export async function searchStudents(query: string): Promise<Student[]> {
 }
 
 /** Filter students by pipeline status */
-export async function getStudentsByStatus(status: string): Promise<Student[]> {
+export async function getStudentsByStatus(status: StudentStatus): Promise<Student[]> {
   const { data, error } = await supabase
     .from('students')
     .select('*')

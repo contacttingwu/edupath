@@ -73,6 +73,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       visas: {
         Row: {
@@ -105,6 +106,15 @@ export type Database = {
           is_current?: boolean
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'visas_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'students'
+            referencedColumns: ['id']
+          }
+        ]
       }
       applications: {
         Row: {
@@ -134,6 +144,15 @@ export type Database = {
           status?: string | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'applications_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'students'
+            referencedColumns: ['id']
+          }
+        ]
       }
       consultations: {
         Row: {
@@ -160,11 +179,29 @@ export type Database = {
           tags?: string[]
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'consultations_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'students'
+            referencedColumns: ['id']
+          }
+        ]
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
