@@ -178,26 +178,58 @@ function VisaRow({
 function ApplicationRow({
   index,
   register,
+  watch,
   onRemove,
+  onToggleChosen,
   errors,
 }: {
   index: number
   register: ReturnType<typeof useForm<StudentFormValues>>['register']
+  watch: ReturnType<typeof useForm<StudentFormValues>>['watch']
   onRemove: () => void
+  onToggleChosen: () => void
   errors: ReturnType<typeof useForm<StudentFormValues>>['formState']['errors']
 }) {
   const appErrors = errors.applications?.[index]
+  const isChosen = watch('applications.' + index + '.isChosen' as 'applications.0.isChosen')
+
   return (
-    <div className="border border-slate-200 rounded-xl p-4 space-y-4">
+    <div className={
+      'border rounded-xl p-4 space-y-4 transition-colors ' +
+      (isChosen ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200')
+    }>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-600">Option {index + 1}</span>
-        <button
-          type="button"
-          onClick={onRemove}
-          className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
-        >
-          <Trash2 size={14} />
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-slate-600">Option {index + 1}</span>
+          {isChosen && (
+            <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+              Chosen
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onToggleChosen}
+            title={isChosen ? 'Unmark as chosen' : 'Mark as chosen'}
+            className={
+              'flex items-center gap-1 text-xs transition-colors px-2 py-1 rounded-lg ' +
+              (isChosen
+                ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                : 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50')
+            }
+          >
+            <Star size={12} fill={isChosen ? 'currentColor' : 'none'} />
+            {isChosen ? 'Chosen' : 'Mark chosen'}
+          </button>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label="School / Institution" error={appErrors?.school?.message}>
@@ -219,10 +251,16 @@ function ApplicationRow({
           />
         </FormField>
         <FormField label="Application Status">
-          <Input
-            {...register('applications.' + index + '.status' as 'applications.0.status')}
-            placeholder="e.g. Offer Received"
-          />
+          <Select {...register('applications.' + index + '.status' as 'applications.0.status')}>
+            <option value="">— Select status —</option>
+            <option value="Not Yet Applied">Not Yet Applied</option>
+            <option value="Applied">Applied</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Offer Received">Offer Received</option>
+            <option value="Offer Accepted">Offer Accepted</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Withdrawn">Withdrawn</option>
+          </Select>
         </FormField>
       </div>
     </div>
@@ -232,7 +270,7 @@ function ApplicationRow({
 // ─── Main page ───────────────────────────────────────────────────────────────
 
 const EMPTY_VISA = { visaType: '', visaNumber: '', issueDate: '', expiryDate: '', isCurrent: false, outcome: 'pending' as const }
-const EMPTY_APP = { school: '', program: '', intakeDate: '', status: '' }
+const EMPTY_APP = { school: '', program: '', intakeDate: '', status: '', isChosen: false }
 
 function emptyApps(count: number) {
   return Array.from({ length: count }, () => ({ ...EMPTY_APP }))
@@ -295,6 +333,7 @@ export function StudentFormPage() {
         program: a.program ?? '',
         intakeDate: a.intakeDate ?? '',
         status: a.status ?? '',
+        isChosen: a.isChosen,
       })),
       ...emptyApps(Math.max(0, 5 - fetchedApps.length)),
     ]
@@ -309,6 +348,7 @@ export function StudentFormPage() {
       addrOverseas: s.addrOverseas ?? '',
       addrHome: s.addrHome ?? '',
       googleDriveLink: s.googleDriveLink ?? '',
+      locationType: s.locationType ?? undefined,
       ecName: s.emergencyContact.name ?? '',
       ecRelationship: s.emergencyContact.relationship ?? '',
       ecPhone: s.emergencyContact.phone ?? '',
@@ -388,6 +428,7 @@ export function StudentFormPage() {
         program: fa.program || null,
         intake_date: fa.intakeDate || null,
         status: fa.status || null,
+        is_chosen: fa.isChosen ?? false,
       }
 
       if (fa.id && existingIds.has(fa.id)) {
@@ -416,6 +457,7 @@ export function StudentFormPage() {
         addr_overseas: values.addrOverseas || null,
         addr_home: values.addrHome || null,
         google_drive_link: values.googleDriveLink || null,
+        location_type: values.locationType ?? null,
         ec_name: values.ecName || null,
         ec_relationship: values.ecRelationship || null,
         ec_phone: values.ecPhone || null,
@@ -453,7 +495,7 @@ export function StudentFormPage() {
       toast.success(isEdit ? 'Student updated' : 'Student created')
       navigate('/students/' + studentId)
     },
-    onError: () => toast.error('Failed to save student'),
+    onError: (err) => toast.error('Failed to save: ' + (err instanceof Error ? err.message : String(err))),
   })
 
   const isLoadingData = isEdit && (studentQuery.isLoading || visasQuery.isLoading)
@@ -504,6 +546,34 @@ export function StudentFormPage() {
               <Input {...register('addrHome')} placeholder="Home country address" />
             </FormField>
           </FullWidth>
+          {/* Onshore / Offshore toggle */}
+          <FullWidth>
+            <FormField label="Student Location">
+              <div className="flex gap-2">
+                {(['Onshore', 'Offshore'] as const).map((opt) => {
+                  const selected = watch('locationType') === opt
+                  return (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => setValue('locationType', selected ? undefined : opt, { shouldDirty: true })}
+                      className={
+                        'flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ' +
+                        (selected
+                          ? opt === 'Onshore'
+                            ? 'bg-blue-600 border-blue-600 text-white'
+                            : 'bg-violet-600 border-violet-600 text-white'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50')
+                      }
+                    >
+                      {opt === 'Onshore' ? '🇦🇺 Onshore' : '✈️ Offshore'}
+                    </button>
+                  )
+                })}
+              </div>
+            </FormField>
+          </FullWidth>
+
           <FullWidth>
             <FormField label="Google Drive Folder" error={errors.googleDriveLink?.message}>
               <div className="relative">
@@ -632,8 +702,13 @@ export function StudentFormPage() {
               key={field.id}
               index={index}
               register={register}
+              watch={watch}
               errors={errors}
               onRemove={() => appArray.remove(index)}
+              onToggleChosen={() => {
+                const current = watch('applications.' + index + '.isChosen' as 'applications.0.isChosen')
+                setValue('applications.' + index + '.isChosen' as 'applications.0.isChosen', !current, { shouldDirty: true })
+              }}
             />
           ))}
 

@@ -39,6 +39,7 @@ function makeStudent(id: string): Student {
     addrOverseas: null,
     addrHome: null,
     googleDriveLink: null,
+    locationType: null,
     emergencyContact: { name: null, relationship: null, phone: null, email: null, address: null },
     emergencyContact2: { name: null, relationship: null, phone: null, email: null, address: null },
     educationHistory: null,

@@ -14,6 +14,7 @@ export interface Student {
   addrOverseas: string | null
   addrHome: string | null
   googleDriveLink: string | null
+  locationType: 'Onshore' | 'Offshore' | null
   emergencyContact: EmergencyContact
   emergencyContact2: EmergencyContact
   educationHistory: string | null
@@ -57,6 +58,7 @@ export interface Application {
   program: string | null
   intakeDate: string | null
   status: string | null
+  isChosen: boolean
   createdAt: string
 }
 

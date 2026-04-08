@@ -35,6 +35,7 @@ export const applicationEntrySchema = z.object({
   program: z.string().optional(),
   intakeDate: z.string().optional(),
   status: z.string().optional(),
+  isChosen: z.boolean().optional(),
 })
 
 export const studentSchema = z.object({
@@ -50,6 +51,7 @@ export const studentSchema = z.object({
   addrOverseas: z.string().optional(),
   addrHome: z.string().optional(),
   googleDriveLink: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  locationType: z.enum(['Onshore', 'Offshore']).optional(),
 
   // Emergency contact 1
   ecName: z.string().optional(),

@@ -18,6 +18,7 @@ export type Database = {
           addr_overseas: string | null
           addr_home: string | null
           google_drive_link: string | null
+          location_type: 'Onshore' | 'Offshore' | null
           // Emergency contact 1
           ec_name: string | null
           ec_relationship: string | null
@@ -48,6 +49,7 @@ export type Database = {
           addr_overseas?: string | null
           addr_home?: string | null
           google_drive_link?: string | null
+          location_type?: 'Onshore' | 'Offshore' | null
           ec_name?: string | null
           ec_relationship?: string | null
           ec_phone?: string | null
@@ -76,6 +78,7 @@ export type Database = {
           addr_overseas?: string | null
           addr_home?: string | null
           google_drive_link?: string | null
+          location_type?: 'Onshore' | 'Offshore' | null
           ec_name?: string | null
           ec_relationship?: string | null
           ec_phone?: string | null
@@ -153,6 +156,7 @@ export type Database = {
           program: string | null
           intake_date: string | null
           status: string | null
+          is_chosen: boolean
           created_at: string
         }
         Insert: {
@@ -162,6 +166,7 @@ export type Database = {
           program?: string | null
           intake_date?: string | null
           status?: string | null
+          is_chosen?: boolean
           created_at?: string
         }
         Update: {
@@ -171,6 +176,7 @@ export type Database = {
           program?: string | null
           intake_date?: string | null
           status?: string | null
+          is_chosen?: boolean
           created_at?: string
         }
         Relationships: [

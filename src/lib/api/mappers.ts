@@ -13,6 +13,7 @@ export function mapStudent(row: StudentRow): Student {
     addrOverseas: row.addr_overseas,
     addrHome: row.addr_home,
     googleDriveLink: row.google_drive_link,
+    locationType: row.location_type,
     emergencyContact: {
       name: row.ec_name,
       relationship: row.ec_relationship,
@@ -60,6 +61,7 @@ export function mapApplication(row: ApplicationRow): Application {
     program: row.program,
     intakeDate: row.intake_date,
     status: row.status,
+    isChosen: row.is_chosen,
     createdAt: row.created_at,
   }
 }

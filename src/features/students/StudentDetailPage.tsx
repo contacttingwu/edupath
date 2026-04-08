@@ -87,23 +87,48 @@ function EmergencyContactCard({ title, contact }: { title: string; contact: Emer
 // ─── Applications card ───────────────────────────────────────────────────────
 
 function ApplicationsCard({ applications }: { applications: Application[] }) {
+  const chosen = applications.filter((a) => a.isChosen)
+  const others = applications.filter((a) => !a.isChosen)
+  const ordered = [...chosen, ...others]
+
   return (
     <Card className="p-5">
-      <h3 className="text-sm font-semibold text-slate-900 mb-4">
-        Course Applications
-        <span className="ml-2 text-slate-400 font-normal text-xs">{applications.length} option{applications.length !== 1 ? 's' : ''}</span>
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-slate-900">
+          Course Applications
+          <span className="ml-2 text-slate-400 font-normal text-xs">
+            {applications.length} option{applications.length !== 1 ? 's' : ''}
+          </span>
+        </h3>
+        {chosen.length > 0 && (
+          <Badge variant="safe">{chosen.length} chosen</Badge>
+        )}
+      </div>
       {applications.length === 0 && (
         <p className="text-sm text-slate-400">No applications recorded.</p>
       )}
       <div className="space-y-3">
-        {applications.map((app, i) => (
-          <div key={app.id} className="flex items-start gap-3 p-3 rounded-lg bg-slate-50 border border-slate-100">
-            <div className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center shrink-0">
+        {ordered.map((app, i) => (
+          <div
+            key={app.id}
+            className={
+              'flex items-start gap-3 p-3 rounded-lg border transition-colors ' +
+              (app.isChosen
+                ? 'bg-emerald-50 border-emerald-200'
+                : 'bg-slate-50 border-slate-100')
+            }
+          >
+            <div className={
+              'w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shrink-0 ' +
+              (app.isChosen ? 'bg-emerald-100 text-emerald-700' : 'bg-violet-100 text-violet-700')
+            }>
               {i + 1}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-slate-800 truncate">{app.school ?? '—'}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm font-medium text-slate-800 truncate">{app.school ?? '—'}</p>
+                {app.isChosen && <Badge variant="safe">★ Chosen</Badge>}
+              </div>
               <p className="text-xs text-slate-500 truncate">{app.program ?? '—'}</p>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 {app.intakeDate && (
@@ -223,6 +248,11 @@ export function StudentDetailPage() {
                   <Badge variant={statusVariant as 'urgent' | 'safe' | 'neutral' | 'purple'}>
                     {student.status}
                   </Badge>
+                  {student.locationType && (
+                    <Badge variant={student.locationType === 'Onshore' ? 'safe' : 'purple'}>
+                      {student.locationType === 'Onshore' ? '🇦🇺 Onshore' : '✈️ Offshore'}
+                    </Badge>
+                  )}
                 </div>
               </div>
 
