@@ -224,7 +224,48 @@ export type Database = {
           }
         ]
       }
-    }
+      australian_education: {
+        Row: {
+          id: string
+          student_id: string
+          institution: string | null
+          course: string | null
+          start_date: string | null
+          end_date: string | null
+          status: AusEduStatus | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          institution?: string | null
+          course?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          status?: AusEduStatus | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          institution?: string | null
+          course?: string | null
+          start_date?: string | null
+          end_date?: string | null
+          status?: AusEduStatus | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'australian_education_student_id_fkey'
+            columns: ['student_id']
+            isOneToOne: false
+            referencedRelation: 'students'
+            referencedColumns: ['id']
+          }
+        ]
+      }
+    }   // end Tables
     Views: {
       [_ in never]: never
     }
@@ -251,6 +292,9 @@ export type StudentStatus =
   | 'Visa Approved'
   | 'Visa Refused'
   | 'Departed'
+
+export type AusEduStatus = 'Currently Studying' | 'Completed' | 'Withdrawn' | 'Did Not Complete'
+export const AUS_EDU_STATUSES: AusEduStatus[] = ['Currently Studying', 'Completed', 'Withdrawn', 'Did Not Complete']
 
 export type VisaOutcome = 'pending' | 'granted' | 'refused'
 export type VisaAppealDecision = 'appeal' | 'left'
@@ -289,6 +333,10 @@ export type VisaUpdate = Database['public']['Tables']['visas']['Update']
 export type ApplicationRow = Database['public']['Tables']['applications']['Row']
 export type ApplicationInsert = Database['public']['Tables']['applications']['Insert']
 export type ApplicationUpdate = Database['public']['Tables']['applications']['Update']
+
+export type AusEduRow = Database['public']['Tables']['australian_education']['Row']
+export type AusEduInsert = Database['public']['Tables']['australian_education']['Insert']
+export type AusEduUpdate = Database['public']['Tables']['australian_education']['Update']
 
 export type ConsultationRow = Database['public']['Tables']['consultations']['Row']
 export type ConsultationInsert = Database['public']['Tables']['consultations']['Insert']

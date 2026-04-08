@@ -1,4 +1,4 @@
-export type { StudentStatus, VisaOutcome, VisaAppealDecision, AppealStatus, STUDENT_STATUSES } from './database'
+export type { StudentStatus, VisaOutcome, VisaAppealDecision, AppealStatus, AusEduStatus, STUDENT_STATUSES } from './database'
 export type { Database } from './database'
 
 // ─── STUDENT ─────────────────────────────────────────────────────────────────
@@ -59,6 +59,19 @@ export interface Application {
   intakeDate: string | null
   status: string | null
   isChosen: boolean
+  createdAt: string
+}
+
+// ─── AUSTRALIAN EDUCATION ────────────────────────────────────────────────────
+
+export interface AusEdu {
+  id: string
+  studentId: string
+  institution: string | null
+  course: string | null
+  startDate: string | null
+  endDate: string | null
+  status: import('./database').AusEduStatus | null
   createdAt: string
 }
 

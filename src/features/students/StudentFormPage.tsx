@@ -11,7 +11,8 @@ import { FormField, Input, Textarea, Select } from '@/components/ui/FormField'
 import { createStudent, getStudentById, updateStudent } from '@/lib/api/students'
 import { getVisasByStudentId, createVisa, updateVisa, deleteVisa } from '@/lib/api/visas'
 import { getApplicationsByStudentId, createApplication, updateApplication, deleteApplication } from '@/lib/api/applications'
-import { STUDENT_STATUSES, APPEAL_STATUSES } from '@/types/database'
+import { getAusEduByStudentId, createAusEdu, updateAusEdu, deleteAusEdu } from '@/lib/api/ausEdu'
+import { STUDENT_STATUSES, APPEAL_STATUSES, AUS_EDU_STATUSES } from '@/types/database'
 import type { StudentInsert, StudentUpdate } from '@/types/database'
 
 // ─── Collapsible section ─────────────────────────────────────────────────────
@@ -267,10 +268,69 @@ function ApplicationRow({
   )
 }
 
+// ─── Australian Education row ────────────────────────────────────────────────
+
+function AusEduRow({
+  index,
+  register,
+  onRemove,
+  errors,
+}: {
+  index: number
+  register: ReturnType<typeof useForm<StudentFormValues>>['register']
+  onRemove: () => void
+  errors: ReturnType<typeof useForm<StudentFormValues>>['formState']['errors']
+}) {
+  const rowErrors = (errors.ausEdu as Record<number, Record<string, { message?: string }>> | undefined)?.[index]
+  return (
+    <div className="border border-slate-200 rounded-xl p-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-slate-600">Entry {index + 1}</span>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="p-1 rounded hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-colors"
+        >
+          <Trash2 size={14} />
+        </button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <FormField label="Institution / Provider" error={rowErrors?.['institution']?.message}>
+          <Input
+            {...register('ausEdu.' + index + '.institution' as 'ausEdu.0.institution')}
+            placeholder="e.g. TAFE NSW, Macquarie University"
+          />
+        </FormField>
+        <FormField label="Course / Qualification" error={rowErrors?.['course']?.message}>
+          <Input
+            {...register('ausEdu.' + index + '.course' as 'ausEdu.0.course')}
+            placeholder="e.g. Diploma of Business"
+          />
+        </FormField>
+        <FormField label="Start Date">
+          <Input {...register('ausEdu.' + index + '.startDate' as 'ausEdu.0.startDate')} type="date" />
+        </FormField>
+        <FormField label="End Date">
+          <Input {...register('ausEdu.' + index + '.endDate' as 'ausEdu.0.endDate')} type="date" />
+        </FormField>
+        <FormField label="Status" error={rowErrors?.['status']?.message}>
+          <Select {...register('ausEdu.' + index + '.status' as 'ausEdu.0.status')}>
+            <option value="">— Select status —</option>
+            {AUS_EDU_STATUSES.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </Select>
+        </FormField>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ───────────────────────────────────────────────────────────────
 
 const EMPTY_VISA = { visaType: '', visaNumber: '', issueDate: '', expiryDate: '', isCurrent: false, outcome: 'pending' as const }
 const EMPTY_APP = { school: '', program: '', intakeDate: '', status: '', isChosen: false }
+const EMPTY_AUS_EDU = { institution: '', course: '', startDate: '', endDate: '', status: undefined }
 
 function emptyApps(count: number) {
   return Array.from({ length: count }, () => ({ ...EMPTY_APP }))
@@ -298,6 +358,12 @@ export function StudentFormPage() {
     enabled: isEdit,
   })
 
+  const ausEduQuery = useQuery({
+    queryKey: ['ausEdu', id],
+    queryFn: () => getAusEduByStudentId(id!),
+    enabled: isEdit,
+  })
+
   const {
     register,
     handleSubmit,
@@ -317,6 +383,7 @@ export function StudentFormPage() {
 
   const visaArray = useFieldArray({ control, name: 'visas' as 'visas' })
   const appArray = useFieldArray({ control, name: 'applications' as 'applications' })
+  const ausEduArray = useFieldArray({ control, name: 'ausEdu' as 'ausEdu' })
 
   // Pre-fill form when editing
   useEffect(() => {
@@ -324,6 +391,7 @@ export function StudentFormPage() {
     if (!s) return
     const fetchedVisas = visasQuery.data ?? []
     const fetchedApps = appsQuery.data ?? []
+    const fetchedAusEdu = ausEduQuery.data ?? []
 
     // Pad apps to at least 5 rows
     const paddedApps = [
@@ -375,8 +443,16 @@ export function StudentFormPage() {
         appealStatus: v.appealStatus ?? '',
       })),
       applications: paddedApps,
+      ausEdu: fetchedAusEdu.map((e) => ({
+        id: e.id,
+        institution: e.institution ?? '',
+        course: e.course ?? '',
+        startDate: e.startDate ?? '',
+        endDate: e.endDate ?? '',
+        status: e.status ?? undefined,
+      })),
     })
-  }, [studentQuery.data, visasQuery.data, appsQuery.data, reset])
+  }, [studentQuery.data, visasQuery.data, appsQuery.data, ausEduQuery.data, reset])
 
   // ─── Save logic ─────────────────────────────────────────────────────────
 
@@ -445,6 +521,32 @@ export function StudentFormPage() {
     }
   }
 
+  async function persistAusEdu(studentId: string, formEntries: NonNullable<StudentFormValues['ausEdu']>) {
+    const existing = ausEduQuery.data ?? []
+    const existingIds = new Set(existing.map((e) => e.id))
+
+    for (const fe of formEntries) {
+      if (!fe.institution && !fe.course) continue
+      const payload = {
+        student_id: studentId,
+        institution: fe.institution || null,
+        course: fe.course || null,
+        start_date: fe.startDate || null,
+        end_date: fe.endDate || null,
+        status: fe.status ?? null,
+      }
+      if (fe.id && existingIds.has(fe.id)) {
+        await updateAusEdu(fe.id, payload)
+        existingIds.delete(fe.id)
+      } else {
+        await createAusEdu(payload)
+      }
+    }
+    for (const removedId of existingIds) {
+      await deleteAusEdu(removedId)
+    }
+  }
+
   const saveMutation = useMutation({
     mutationFn: async (values: StudentFormValues) => {
       const studentPayload = {
@@ -485,6 +587,7 @@ export function StudentFormPage() {
 
       await persistVisas(studentId, values.visas ?? [])
       await persistApplications(studentId, values.applications ?? [])
+      await persistAusEdu(studentId, values.ausEdu ?? [])
 
       return studentId
     },
@@ -492,6 +595,7 @@ export function StudentFormPage() {
       void queryClient.invalidateQueries({ queryKey: ['students'] })
       void queryClient.invalidateQueries({ queryKey: ['visas'] })
       void queryClient.invalidateQueries({ queryKey: ['applications'] })
+      void queryClient.invalidateQueries({ queryKey: ['ausEdu'] })
       toast.success(isEdit ? 'Student updated' : 'Student created')
       navigate('/students/' + studentId)
     },
@@ -721,6 +825,34 @@ export function StudentFormPage() {
               <Plus size={15} /> Add Course Option
             </button>
           )}
+        </div>
+      </Section>
+
+      {/* ── Australian Education ── */}
+      <Section title="Australian Education History" defaultOpen={false} badge={ausEduArray.fields.length}>
+        <div className="px-6 py-5 space-y-4">
+          <p className="text-xs text-slate-400">
+            Courses or qualifications the student has completed or is currently studying in Australia.
+          </p>
+          {ausEduArray.fields.length === 0 && (
+            <p className="text-sm text-slate-400 text-center py-4">No Australian education records yet.</p>
+          )}
+          {ausEduArray.fields.map((field, index) => (
+            <AusEduRow
+              key={field.id}
+              index={index}
+              register={register}
+              errors={errors}
+              onRemove={() => ausEduArray.remove(index)}
+            />
+          ))}
+          <button
+            type="button"
+            onClick={() => ausEduArray.append({ ...EMPTY_AUS_EDU })}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-dashed border-slate-300 text-sm text-slate-500 hover:border-violet-400 hover:text-violet-600 transition-colors"
+          >
+            <Plus size={15} /> Add Education Entry
+          </button>
         </div>
       </Section>
 

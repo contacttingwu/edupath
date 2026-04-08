@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { StudentStatus, VisaOutcome, VisaAppealDecision } from '@/types/database'
+import type { StudentStatus, VisaOutcome, VisaAppealDecision, AusEduStatus } from '@/types/database'
 
 const STATUS_TUPLE = [
   'Consulting',
@@ -16,6 +16,16 @@ const STATUS_TUPLE = [
 
 const VISA_OUTCOME_TUPLE = ['pending', 'granted', 'refused'] as const satisfies [VisaOutcome, ...VisaOutcome[]]
 const APPEAL_DECISION_TUPLE = ['appeal', 'left'] as const satisfies [VisaAppealDecision, VisaAppealDecision]
+const AUS_EDU_STATUS_TUPLE = ['Currently Studying', 'Completed', 'Withdrawn', 'Did Not Complete'] as const satisfies [AusEduStatus, ...AusEduStatus[]]
+
+export const ausEduEntrySchema = z.object({
+  id: z.string().optional(),
+  institution: z.string().optional(),
+  course: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  status: z.enum(AUS_EDU_STATUS_TUPLE).optional(),
+})
 
 export const visaEntrySchema = z.object({
   id: z.string().optional(),
@@ -80,8 +90,12 @@ export const studentSchema = z.object({
 
   // Applications (up to 5 course options)
   applications: z.array(applicationEntrySchema).optional(),
+
+  // Australian education history
+  ausEdu: z.array(ausEduEntrySchema).optional(),
 })
 
 export type StudentFormValues = z.infer<typeof studentSchema>
 export type VisaEntryValues = z.infer<typeof visaEntrySchema>
 export type ApplicationEntryValues = z.infer<typeof applicationEntrySchema>
+export type AusEduEntryValues = z.infer<typeof ausEduEntrySchema>

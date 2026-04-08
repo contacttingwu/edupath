@@ -1,5 +1,5 @@
-import type { StudentRow, VisaRow, ApplicationRow, ConsultationRow } from '@/types/database'
-import type { Student, Visa, Application, Consultation } from '@/types'
+import type { StudentRow, VisaRow, ApplicationRow, ConsultationRow, AusEduRow } from '@/types/database'
+import type { Student, Visa, Application, Consultation, AusEdu } from '@/types'
 
 export function mapStudent(row: StudentRow): Student {
   return {
@@ -62,6 +62,19 @@ export function mapApplication(row: ApplicationRow): Application {
     intakeDate: row.intake_date,
     status: row.status,
     isChosen: row.is_chosen,
+    createdAt: row.created_at,
+  }
+}
+
+export function mapAusEdu(row: AusEduRow): AusEdu {
+  return {
+    id: row.id,
+    studentId: row.student_id,
+    institution: row.institution,
+    course: row.course,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    status: row.status,
     createdAt: row.created_at,
   }
 }

@@ -8,6 +8,7 @@ import {
 import { getStudentById } from '@/lib/api/students'
 import { getVisasByStudentId } from '@/lib/api/visas'
 import { getApplicationsByStudentId } from '@/lib/api/applications'
+import { getAusEduByStudentId } from '@/lib/api/ausEdu'
 import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Card } from '@/components/ui/Card'
@@ -16,8 +17,7 @@ import { ProgressTrack } from './ProgressTrack'
 import { VisaInfoCard } from './VisaInfoCard'
 import { ConsultationLog } from './ConsultationLog'
 import { formatDate } from '@/lib/utils'
-import type { EmergencyContact } from '@/types'
-import type { Application } from '@/types'
+import type { EmergencyContact, Application, AusEdu } from '@/types'
 
 // ─── Small info row ──────────────────────────────────────────────────────────
 
@@ -146,6 +146,55 @@ function ApplicationsCard({ applications }: { applications: Application[] }) {
   )
 }
 
+// ─── Australian Education card ───────────────────────────────────────────────
+
+const AUS_EDU_STATUS_VARIANT: Record<string, 'safe' | 'warning' | 'urgent' | 'neutral'> = {
+  'Currently Studying': 'safe',
+  'Completed': 'neutral',
+  'Withdrawn': 'warning',
+  'Did Not Complete': 'urgent',
+}
+
+function AusEduCard({ entries }: { entries: AusEdu[] }) {
+  return (
+    <Card className="p-5">
+      <h3 className="text-sm font-semibold text-slate-900 mb-4">
+        Australian Education
+        <span className="ml-2 text-slate-400 font-normal text-xs">
+          {entries.length} record{entries.length !== 1 ? 's' : ''}
+        </span>
+      </h3>
+      {entries.length === 0 && (
+        <p className="text-sm text-slate-400">No Australian education records.</p>
+      )}
+      <div className="space-y-3">
+        {entries.map((e) => (
+          <div key={e.id} className="p-3 rounded-lg bg-slate-50 border border-slate-100">
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-800">{e.institution ?? '—'}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{e.course ?? '—'}</p>
+              </div>
+              {e.status && (
+                <Badge variant={AUS_EDU_STATUS_VARIANT[e.status] ?? 'neutral'}>
+                  {e.status}
+                </Badge>
+              )}
+            </div>
+            {(e.startDate || e.endDate) && (
+              <p className="text-xs text-slate-400 mt-2">
+                {e.startDate ? formatDate(e.startDate) : '?'}
+                {' → '}
+                {e.endDate ? formatDate(e.endDate) : (e.status === 'Currently Studying' ? 'Present' : '?')}
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </Card>
+  )
+}
+
 // ─── Text block card ─────────────────────────────────────────────────────────
 
 function TextCard({ title, icon, content }: { title: string; icon: React.ReactNode; content: string | null }) {
@@ -199,6 +248,12 @@ export function StudentDetailPage() {
     enabled: !!id,
   })
 
+  const ausEduQuery = useQuery({
+    queryKey: ['ausEdu', id],
+    queryFn: () => getAusEduByStudentId(id!),
+    enabled: !!id,
+  })
+
   if (studentQuery.isLoading) {
     return (
       <div className="max-w-5xl mx-auto space-y-4">
@@ -223,6 +278,7 @@ export function StudentDetailPage() {
   const student = studentQuery.data
   const visas = visasQuery.data ?? []
   const applications = appsQuery.data ?? []
+  const ausEduEntries = ausEduQuery.data ?? []
   const statusVariant = (STATUS_BADGE_VARIANT as Record<string, string>)[student.status] ?? 'neutral'
 
   return (
@@ -326,6 +382,9 @@ export function StudentDetailPage() {
         <VisaInfoCard visas={visas} />
         <ApplicationsCard applications={applications} />
       </div>
+
+      {/* ── Australian Education ── */}
+      <AusEduCard entries={ausEduEntries} />
 
       {/* ── Education + Work ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
