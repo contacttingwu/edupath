@@ -14,6 +14,17 @@ export async function getConsultationsByStudentId(studentId: string): Promise<Co
   return data.map(mapConsultation)
 }
 
+/** All consultations across all students — for the Consultations page */
+export async function getAllConsultations(): Promise<Consultation[]> {
+  const { data, error } = await supabase
+    .from('consultations')
+    .select('*')
+    .order('consult_date', { ascending: false })
+
+  if (error) throw error
+  return data.map(mapConsultation)
+}
+
 /** Most recent consultations across all students — for dashboard widget */
 export async function getRecentConsultations(limit = 5): Promise<Consultation[]> {
   const { data, error } = await supabase
