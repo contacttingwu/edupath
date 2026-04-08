@@ -8,9 +8,11 @@ import {
   GraduationCap,
   ChevronLeft,
   ChevronRight,
+  LogOut,
 } from 'lucide-react'
 import { useUIStore } from '@/store/ui'
 import { useVisaAlerts } from '@/hooks/useVisaAlerts'
+import { supabase } from '@/lib/supabase'
 
 interface NavItem {
   label: string
@@ -107,6 +109,22 @@ export function Sidebar() {
             </div>
           ))}
         </nav>
+
+        {/* Sign out */}
+        <div className="shrink-0 p-2 border-t border-slate-100">
+          <button
+            onClick={() => void supabase.auth.signOut()}
+            className={
+              'flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors ' +
+              (collapsed ? 'justify-center' : '')
+            }
+            title="Sign out"
+            aria-label="Sign out"
+          >
+            <LogOut size={18} className="shrink-0" />
+            {!collapsed && <span>Sign out</span>}
+          </button>
+        </div>
 
         {/* Collapse toggle — desktop only */}
         <button
