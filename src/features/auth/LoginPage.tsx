@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { GraduationCap } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
-export function LoginPage() {
+interface LoginPageProps {
+  onSwitchToSignUp: () => void
+}
+
+export function LoginPage({ onSwitchToSignUp }: LoginPageProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -83,6 +87,16 @@ export function LoginPage() {
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>
+
+          <p className="text-sm text-slate-500 text-center mt-6">
+            Don't have an account?{' '}
+            <button
+              onClick={onSwitchToSignUp}
+              className="text-violet-600 font-medium hover:underline"
+            >
+              Create account
+            </button>
+          </p>
         </div>
       </div>
     </div>

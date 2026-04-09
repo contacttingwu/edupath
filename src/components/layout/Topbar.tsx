@@ -2,11 +2,16 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { Search, Plus, Menu } from 'lucide-react'
 import { useUIStore } from '@/store/ui'
 
+interface CtaButton {
+  label: string
+  action: () => void
+  variant?: 'primary' | 'secondary'
+}
+
 interface TopbarConfig {
   title: string
   breadcrumbs: { label: string; path?: string }[]
-  ctaLabel?: string
-  ctaAction?: () => void
+  ctas?: CtaButton[]
 }
 
 function useTopbarConfig(): TopbarConfig {
@@ -38,40 +43,38 @@ function useTopbarConfig(): TopbarConfig {
     return {
       title: 'Students',
       breadcrumbs: [{ label: 'Students' }],
-      ctaLabel: 'Add Student',
-      ctaAction: () => navigate('/students/new'),
-    }
-  }
-  if (path === '/pipeline') {
-    return {
-      title: 'Pipeline',
-      breadcrumbs: [{ label: 'Pipeline' }],
-      ctaLabel: 'Log Consultation',
-      ctaAction: () => openAddConsultation(),
-    }
-  }
-  if (path === '/visas') {
-    return {
-      title: 'Visa Tracker',
-      breadcrumbs: [{ label: 'Visa Tracker' }],
-      ctaLabel: 'Log Consultation',
-      ctaAction: () => openAddConsultation(),
-    }
-  }
-  if (path === '/consultations') {
-    return {
-      title: 'Consultations',
-      breadcrumbs: [{ label: 'Consultations' }],
-      ctaLabel: 'Log Consultation',
-      ctaAction: () => openAddConsultation(),
+      ctas: [{ label: 'Add Student', action: () => navigate('/students/new'), variant: 'primary' }],
     }
   }
   if (path === '/dashboard') {
     return {
       title: 'Dashboard',
       breadcrumbs: [{ label: 'Dashboard' }],
-      ctaLabel: 'Log Consultation',
-      ctaAction: () => openAddConsultation(),
+      ctas: [
+        { label: 'Add Student', action: () => navigate('/students/new'), variant: 'primary' },
+        { label: 'Log Consultation', action: () => openAddConsultation(), variant: 'secondary' },
+      ],
+    }
+  }
+  if (path === '/pipeline') {
+    return {
+      title: 'Pipeline',
+      breadcrumbs: [{ label: 'Pipeline' }],
+      ctas: [{ label: 'Log Consultation', action: () => openAddConsultation(), variant: 'primary' }],
+    }
+  }
+  if (path === '/visas') {
+    return {
+      title: 'Visa Tracker',
+      breadcrumbs: [{ label: 'Visa Tracker' }],
+      ctas: [{ label: 'Log Consultation', action: () => openAddConsultation(), variant: 'primary' }],
+    }
+  }
+  if (path === '/consultations') {
+    return {
+      title: 'Consultations',
+      breadcrumbs: [{ label: 'Consultations' }],
+      ctas: [{ label: 'Log Consultation', action: () => openAddConsultation(), variant: 'primary' }],
     }
   }
 
@@ -88,7 +91,7 @@ export function Topbar() {
   const showSearch = location.pathname === '/students'
 
   return (
-    <header className="flex items-center gap-4 h-16 px-6 bg-white border-b border-slate-200 shrink-0">
+    <header className="flex items-center gap-3 h-16 px-4 sm:px-6 bg-white border-b border-slate-200 shrink-0">
       {/* Mobile menu toggle */}
       <button
         onClick={toggleSidebar}
@@ -138,15 +141,25 @@ export function Topbar() {
         </div>
       )}
 
-      {/* CTA */}
-      {config.ctaLabel && config.ctaAction && (
-        <button
-          onClick={config.ctaAction}
-          className="flex items-center gap-1.5 px-4 h-9 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors shrink-0"
-        >
-          <Plus size={16} />
-          {config.ctaLabel}
-        </button>
+      {/* CTAs */}
+      {config.ctas && config.ctas.length > 0 && (
+        <div className="flex items-center gap-2 shrink-0">
+          {config.ctas.map((cta) => (
+            <button
+              key={cta.label}
+              onClick={cta.action}
+              className={
+                'flex items-center gap-1.5 px-4 h-9 rounded-lg text-sm font-medium transition-colors ' +
+                (cta.variant === 'secondary'
+                  ? 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                  : 'bg-violet-600 text-white hover:bg-violet-700')
+              }
+            >
+              <Plus size={15} />
+              <span className="hidden sm:inline">{cta.label}</span>
+            </button>
+          ))}
+        </div>
       )}
     </header>
   )
