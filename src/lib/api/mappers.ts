@@ -10,8 +10,11 @@ export function mapStudent(row: StudentRow): Student {
     nationality: row.nationality,
     email: row.email,
     phone: row.phone,
+    homeMobile: row.home_mobile,
     addrOverseas: row.addr_overseas,
     addrHome: row.addr_home,
+    gender: row.gender,
+    relationshipStatus: row.relationship_status,
     googleDriveLink: row.google_drive_link,
     locationType: row.location_type,
     emergencyContact: {

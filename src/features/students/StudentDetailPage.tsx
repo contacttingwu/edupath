@@ -342,6 +342,18 @@ export function StudentDetailPage() {
                   <p className="text-sm font-medium text-slate-700">{formatDate(student.dob)}</p>
                 </div>
               )}
+              {student.gender && (
+                <div>
+                  <p className="text-xs text-slate-400">Gender</p>
+                  <p className="text-sm font-medium text-slate-700">{student.gender}</p>
+                </div>
+              )}
+              {student.relationshipStatus && (
+                <div>
+                  <p className="text-xs text-slate-400">Relationship</p>
+                  <p className="text-sm font-medium text-slate-700">{student.relationshipStatus}</p>
+                </div>
+              )}
               {student.email && (
                 <div>
                   <p className="text-xs text-slate-400">Email</p>
@@ -354,6 +366,12 @@ export function StudentDetailPage() {
                 <div>
                   <p className="text-xs text-slate-400">Phone</p>
                   <p className="text-sm font-medium text-slate-700">{student.phone}</p>
+                </div>
+              )}
+              {student.homeMobile && (
+                <div>
+                  <p className="text-xs text-slate-400">Home Mobile</p>
+                  <p className="text-sm font-medium text-slate-700">{student.homeMobile}</p>
                 </div>
               )}
               <div>

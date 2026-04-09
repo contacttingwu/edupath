@@ -17,6 +17,9 @@ export type Database = {
           phone: string | null
           addr_overseas: string | null
           addr_home: string | null
+          gender: 'Female' | 'Male' | 'Other' | null
+          relationship_status: 'Single' | 'De Facto' | 'Married' | 'Divorced' | null
+          home_mobile: string | null
           google_drive_link: string | null
           location_type: 'Onshore' | 'Offshore' | null
           // Emergency contact 1
@@ -48,6 +51,9 @@ export type Database = {
           phone?: string | null
           addr_overseas?: string | null
           addr_home?: string | null
+          gender?: 'Female' | 'Male' | 'Other' | null
+          relationship_status?: 'Single' | 'De Facto' | 'Married' | 'Divorced' | null
+          home_mobile?: string | null
           google_drive_link?: string | null
           location_type?: 'Onshore' | 'Offshore' | null
           ec_name?: string | null
@@ -77,6 +83,9 @@ export type Database = {
           phone?: string | null
           addr_overseas?: string | null
           addr_home?: string | null
+          gender?: 'Female' | 'Male' | 'Other' | null
+          relationship_status?: 'Single' | 'De Facto' | 'Married' | 'Divorced' | null
+          home_mobile?: string | null
           google_drive_link?: string | null
           location_type?: 'Onshore' | 'Offshore' | null
           ec_name?: string | null

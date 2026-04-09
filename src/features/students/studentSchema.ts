@@ -55,9 +55,14 @@ export const studentSchema = z.object({
   dob: z.string().optional(),
   nationality: z.string().optional(),
 
+  // Personal details
+  gender: z.enum(['Female', 'Male', 'Other']).optional(),
+  relationshipStatus: z.enum(['Single', 'De Facto', 'Married', 'Divorced']).optional(),
+
   // Contact
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   phone: z.string().optional(),
+  homeMobile: z.string().optional(),
   addrOverseas: z.string().optional(),
   addrHome: z.string().optional(),
   googleDriveLink: z.string().url('Must be a valid URL').optional().or(z.literal('')),

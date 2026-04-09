@@ -11,8 +11,11 @@ export interface Student {
   nationality: string | null
   email: string | null
   phone: string | null
+  homeMobile: string | null
   addrOverseas: string | null
   addrHome: string | null
+  gender: 'Female' | 'Male' | 'Other' | null
+  relationshipStatus: 'Single' | 'De Facto' | 'Married' | 'Divorced' | null
   googleDriveLink: string | null
   locationType: 'Onshore' | 'Offshore' | null
   emergencyContact: EmergencyContact

@@ -411,8 +411,11 @@ export function StudentFormPage() {
       preferredName: s.preferredName ?? '',
       dob: s.dob ?? '',
       nationality: s.nationality ?? '',
+      gender: s.gender ?? undefined,
+      relationshipStatus: s.relationshipStatus ?? undefined,
       email: s.email ?? '',
       phone: s.phone ?? '',
+      homeMobile: s.homeMobile ?? '',
       addrOverseas: s.addrOverseas ?? '',
       addrHome: s.addrHome ?? '',
       googleDriveLink: s.googleDriveLink ?? '',
@@ -554,8 +557,11 @@ export function StudentFormPage() {
         preferred_name: values.preferredName || null,
         dob: values.dob || null,
         nationality: values.nationality || null,
+        gender: values.gender ?? null,
+        relationship_status: values.relationshipStatus ?? null,
         email: values.email || null,
         phone: values.phone || null,
+        home_mobile: values.homeMobile || null,
         addr_overseas: values.addrOverseas || null,
         addr_home: values.addrHome || null,
         google_drive_link: values.googleDriveLink || null,
@@ -634,11 +640,31 @@ export function StudentFormPage() {
           <FormField label="Nationality">
             <Input {...register('nationality')} placeholder="e.g. Taiwanese" />
           </FormField>
+          <FormField label="Gender">
+            <Select {...register('gender')}>
+              <option value="">— Select —</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+              <option value="Other">Other</option>
+            </Select>
+          </FormField>
+          <FormField label="Relationship Status">
+            <Select {...register('relationshipStatus')}>
+              <option value="">— Select —</option>
+              <option value="Single">Single</option>
+              <option value="De Facto">De Facto</option>
+              <option value="Married">Married</option>
+              <option value="Divorced">Divorced</option>
+            </Select>
+          </FormField>
           <FormField label="Email" error={errors.email?.message}>
             <Input {...register('email')} type="email" placeholder="student@email.com" />
           </FormField>
-          <FormField label="Phone">
-            <Input {...register('phone')} placeholder="+886 912 345 678" />
+          <FormField label="Phone (local)">
+            <Input {...register('phone')} placeholder="+61 4xx xxx xxx" />
+          </FormField>
+          <FormField label="Home Country Mobile">
+            <Input {...register('homeMobile')} placeholder="+886 912 345 678" />
           </FormField>
           <FullWidth>
             <FormField label="Overseas Address">
