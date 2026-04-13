@@ -6,9 +6,10 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { X } from 'lucide-react'
 import { format } from 'date-fns'
-import { createConsultation } from '@/lib/api/consultations'
+import { createConsultation, updateConsultation } from '@/lib/api/consultations'
 import { getAllStudents } from '@/lib/api/students'
 import { FormField, Input, Textarea, Select } from '@/components/ui/FormField'
+import type { Consultation } from '@/types'
 
 const schema = z.object({
   studentId: z.string().min(1, 'Student is required'),
@@ -20,30 +21,39 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>
 
 interface AddConsultationModalProps {
-  studentId?: string   // pre-select a student
+  studentId?: string       // pre-select a student
+  consultation?: Consultation  // if provided → edit mode
   onClose: () => void
   onSuccess?: () => void
 }
 
-export function AddConsultationModal({ studentId, onClose, onSuccess }: AddConsultationModalProps) {
+export function AddConsultationModal({ studentId, consultation, onClose, onSuccess }: AddConsultationModalProps) {
   const queryClient = useQueryClient()
   const backdropRef = useRef<HTMLDivElement>(null)
+  const isEditMode = !!consultation
 
   const studentsQuery = useQuery({
     queryKey: ['students'],
     queryFn: getAllStudents,
-    enabled: !studentId,
+    enabled: !studentId && !isEditMode,
   })
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema) as any,
-    defaultValues: {
-      studentId: studentId ?? '',
-      consultDate: format(new Date(), 'yyyy-MM-dd'),
-      notes: '',
-      tagsRaw: '',
-    },
+    defaultValues: isEditMode
+      ? {
+          studentId: consultation.studentId,
+          consultDate: consultation.consultDate,
+          notes: consultation.notes ?? '',
+          tagsRaw: consultation.tags.join(', '),
+        }
+      : {
+          studentId: studentId ?? '',
+          consultDate: format(new Date(), 'yyyy-MM-dd'),
+          notes: '',
+          tagsRaw: '',
+        },
   })
 
   // Close on Escape
@@ -58,6 +68,13 @@ export function AddConsultationModal({ studentId, onClose, onSuccess }: AddConsu
       const tags = values.tagsRaw
         ? values.tagsRaw.split(',').map((t) => t.trim()).filter(Boolean)
         : []
+      if (isEditMode) {
+        return updateConsultation(consultation.id, {
+          consult_date: values.consultDate,
+          notes: values.notes,
+          tags,
+        })
+      }
       return createConsultation({
         student_id: values.studentId,
         consult_date: values.consultDate,
@@ -68,11 +85,11 @@ export function AddConsultationModal({ studentId, onClose, onSuccess }: AddConsu
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['consultations'] })
       void queryClient.invalidateQueries({ queryKey: ['students'] })
-      toast.success('Consultation logged')
+      toast.success(isEditMode ? 'Consultation updated' : 'Consultation logged')
       onSuccess?.()
       onClose()
     },
-    onError: () => toast.error('Failed to log consultation'),
+    onError: () => toast.error(isEditMode ? 'Failed to update consultation' : 'Failed to log consultation'),
   })
 
   return (
@@ -84,7 +101,9 @@ export function AddConsultationModal({ studentId, onClose, onSuccess }: AddConsu
       <div className="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-lg">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h2 className="text-sm font-semibold text-slate-900">Log Consultation</h2>
+          <h2 className="text-sm font-semibold text-slate-900">
+            {isEditMode ? 'Edit Consultation' : 'Log Consultation'}
+          </h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-md hover:bg-slate-100 text-slate-400 transition-colors"
@@ -98,8 +117,8 @@ export function AddConsultationModal({ studentId, onClose, onSuccess }: AddConsu
           onSubmit={handleSubmit((v) => mutation.mutate(v))}
           className="p-6 space-y-4"
         >
-          {/* Student selector — only shown when no studentId pre-selected */}
-          {!studentId && (
+          {/* Student selector — only shown when no studentId pre-selected and not in edit mode */}
+          {!studentId && !isEditMode && (
             <FormField label="Student" required error={errors.studentId?.message}>
               <Select {...register('studentId')} error={!!errors.studentId}>
                 <option value="">— Select student —</option>
@@ -145,7 +164,9 @@ export function AddConsultationModal({ studentId, onClose, onSuccess }: AddConsu
               disabled={mutation.isPending}
               className="px-4 py-2 rounded-lg text-sm bg-violet-600 text-white font-medium hover:bg-violet-700 disabled:opacity-50 transition-colors"
             >
-              {mutation.isPending ? 'Saving…' : 'Log Consultation'}
+              {mutation.isPending
+                ? (isEditMode ? 'Saving…' : 'Saving…')
+                : (isEditMode ? 'Save Changes' : 'Log Consultation')}
             </button>
           </div>
         </form>
