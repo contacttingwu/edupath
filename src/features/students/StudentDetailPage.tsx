@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import {
   Pencil, ExternalLink, Phone, Mail, MapPin,
-  GraduationCap, Briefcase, BookOpen, User,
+  GraduationCap, Briefcase, BookOpen, User, Trash2,
 } from 'lucide-react'
-import { getStudentById } from '@/lib/api/students'
+import { toast } from 'sonner'
+import { getStudentById, deleteStudent } from '@/lib/api/students'
 import { getVisasByStudentId } from '@/lib/api/visas'
 import { getApplicationsByStudentId } from '@/lib/api/applications'
 import { getAusEduByStudentId } from '@/lib/api/ausEdu'
@@ -225,6 +227,18 @@ const STATUS_BADGE_VARIANT = {
 export function StudentDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteStudent(id!),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['students'] })
+      toast.success('Student deleted')
+      navigate('/students')
+    },
+    onError: () => toast.error('Failed to delete student'),
+  })
 
   const studentQuery = useQuery({
     queryKey: ['students', id],
@@ -324,6 +338,13 @@ export function StudentDetailPage() {
                     Drive
                   </a>
                 )}
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-red-200 text-red-500 text-sm font-medium hover:bg-red-50 transition-colors"
+                >
+                  <Trash2 size={14} />
+                  Delete
+                </button>
                 <button
                   onClick={() => navigate('/students/' + id + '/edit')}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-medium hover:bg-violet-700 transition-colors"
@@ -429,6 +450,33 @@ export function StudentDetailPage() {
 
       {/* ── Consultation log ── */}
       <ConsultationLog studentId={student.id} />
+
+      {/* ── Delete confirmation dialog ── */}
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xl w-full max-w-sm p-6">
+            <h2 className="text-base font-semibold text-slate-900 mb-2">Delete student?</h2>
+            <p className="text-sm text-slate-500 mb-6">
+              This will permanently delete <span className="font-medium text-slate-700">{student.preferredName ?? student.name}</span> and all their consultations, visas and applications. This cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+                className="px-4 py-2 rounded-lg text-sm bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+              >
+                {deleteMutation.isPending ? 'Deleting…' : 'Yes, delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
