@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import type { Session } from '@supabase/supabase-js'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { Layout } from '@/components/layout/Layout'
 import { LoginPage } from '@/features/auth/LoginPage'
@@ -12,18 +13,23 @@ import { StudentFormPage } from '@/features/students/StudentFormPage'
 import { PipelinePage } from '@/features/pipeline/PipelinePage'
 import { VisaTrackerPage } from '@/features/visas/VisaTrackerPage'
 import { ConsultationsPage } from '@/features/consultations/ConsultationsPage'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 
 export default function App() {
   const [session, setSession] = useState<Session | null | undefined>(undefined)
   const [authView, setAuthView] = useState<'login' | 'signup'>('login')
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     void supabase.auth.getSession().then(({ data }) => setSession(data.session))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        queryClient.clear()
+      }
       setSession(session)
     })
     return () => subscription.unsubscribe()
-  }, [])
+  }, [queryClient])
 
   // Still loading — avoid flash
   if (session === undefined) return null
@@ -43,7 +49,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/students" element={<StudentListPage />} />
         <Route path="/students/new" element={<StudentFormPage />} />
-        <Route path="/students/:id" element={<StudentDetailPage />} />
+        <Route path="/students/:id" element={<ErrorBoundary><StudentDetailPage /></ErrorBoundary>} />
         <Route path="/students/:id/edit" element={<StudentFormPage />} />
         <Route path="/pipeline" element={<PipelinePage />} />
         <Route path="/visas" element={<VisaTrackerPage />} />

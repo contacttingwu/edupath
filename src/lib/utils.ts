@@ -16,11 +16,17 @@ export function daysUntil(dateStr: string): number {
 
 /**
  * Formats an ISO date string as "DD MMM YYYY" (e.g. "08 Apr 2026").
- * Returns "—" for null/undefined.
+ * Returns "—" for null/undefined/invalid dates.
  */
 export function formatDate(dateStr: string | null | undefined): string {
   if (!dateStr) return '—'
-  return format(parseISO(dateStr), 'dd MMM yyyy')
+  try {
+    const parsed = parseISO(dateStr)
+    if (isNaN(parsed.getTime())) return '—'
+    return format(parsed, 'dd MMM yyyy')
+  } catch {
+    return '—'
+  }
 }
 
 // ─── VISA STATUS ─────────────────────────────────────────────────────────────
